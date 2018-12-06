@@ -1,7 +1,5 @@
 ﻿# GBDT算法详解
 
-标签（空格分隔）： MachineLearning
-
 ---
 [TOC]
 
@@ -34,6 +32,8 @@ GBDT（Gradient Boosting Descision Tree），是各类机器学习算法比赛�
 
 由于从所有可能决策树中选择最优决策树是NP完全问题，所以现实生活中决策树学习算法通常采用**启发式方法**，近似求解最优化问题。这样得到的决策树是**次最优sub-optimal**。
 
+
+
 决策树的学习包括三个过程：
 
 1. 特征选择
@@ -41,6 +41,8 @@ GBDT（Gradient Boosting Descision Tree），是各类机器学习算法比赛�
 3. 决策树的剪枝（考虑全局最优）
     1. 预剪枝（Pre-Pruning）：在决策树生成同时进行剪枝
     2. 后剪枝（Post-Pruning）：在决策树构造完成后进行剪枝（通常后剪枝效果好于预剪枝，因此后面该节讨论的都是后剪枝）
+
+
 
 决策树生成的具体步骤如下：
 
@@ -51,12 +53,15 @@ GBDT（Gradient Boosting Descision Tree），是各类机器学习算法比赛�
 
 可知，在生成决策树时，我们采取的是【贪心】的方法。
 
+
+
 对于上述生成步骤生成的决策树，对于训练数据拟合会很好，但是泛化能力却很差，有过拟合的问题，因此需要剪枝步骤来防止过拟合。
 
 而决策树的剪枝步骤，则是通过极小化决策树的整体损失函数（loss function）来实现的。常见损失函数的形式为
-$$C_{\alpha}=C(T)+\alpha|T| \\ 
-C(T)是模型对训练数据的误差，|T|是模型复杂度$$
-
+$$
+C_{\alpha}=C(T)+\alpha|T| \\
+C(T)是模型对训练数据的误差，|T|是模型复杂度
+$$
 而剪枝，就是在$\alpha$确定时，选择令损失函数最小的模型。具体来说，就是通过递归的从树的叶子结点往上缩，判断剪枝后的树是否比未剪枝的树的$C_{\alpha}$值小，小则剪枝成功。
 
 ### 2.2 CART: Classification and Regression Tree
@@ -74,13 +79,15 @@ CART的算法步骤也分为两步，分别是决策树生成和决策树剪枝�
 以最小二乘回归树（least squares regression tree）为例，我们来了解下决策树的生成步骤。
 
 设数据集为$D=\{(x_1,y_1),(x_2,y_2)\dots(x_n,y_n)\}$，设树已有$M$个叶子结点$R_1,R_2,\dots,R_M$，每个叶子结点有个固定的输出值$c_m$，那么决策树模型就可表示为
-$$f(x)=\sum^M_{m=1}c_mI(x\in R_m)$$
-
-最小二乘回归树使用平方误差$\sum_{x_i\in R_m}(y_i-f(x_i))^2$来表示预测误差，我们需要求解出每个叶子节点上的最优输出值$\hat{c}_m$。对于平方误差求解最小值，易得$\hat{c}_m=ave(y_i|x_i\in R_m)$
+$$
+f(x)=\sum^M_{m=1}c_mI(x\in R_m)
+$$
+最小二乘回归树使用平方误差$\sum_{x_i\in R_m}(y_i-f(x_i))^2$来表示预测误差，我们需要求解出每个叶子节点上的最优输出值$\hat{c}_m$。对于平方误差求解最小值，易得$\hat{c}_m=ave(y_i|x_i\in R_m)$.
 
 关键在于如何对输入空间进行划分？我们需要寻找最优切分变量$j$和最优切分点$s$。即求解
-$$min_{j,s}[min_{c1}\sum_{x_i\in R_1(j,s)}(y_i-c_1)^2+min_{c2}\sum_{x_i\in R_2(j,s)}(y_i-c_2)^2]$$
-
+$$
+min_{j,s}[min_{c1}\sum_{x_i\in R_1(j,s)}(y_i-c_1)^2+min_{c2}\sum_{x_i\in R_2(j,s)}(y_i-c_2)^2]
+$$
 我们需要遍历所有变量$j$，然后固定$j$遍历切分点$s$，使得上式达到最小。
 
 不断地对划分后的子空间按上述方法进行递归划分，直到满足停止条件（例如每个叶子结点仅有一个样本）。
@@ -101,24 +108,21 @@ $$min_{j,s}[min_{c1}\sum_{x_i\in R_1(j,s)}(y_i-c_1)^2+min_{c2}\sum_{x_i\in R_2(j
 针对前面两个问题，大部分Boosting算法都是用**加法模型（additive model）**来组合弱分类器，然后用**前向分步算法（forward stagewise algorithm）**来训练改变训练数据的权值和概率分布（包括AdaBoost算法）。
 
 考虑加法模型
-
-\begin{equation}
-f(x)=\sum^M_{m=1}\beta_mb(x;\gamma_m)
-\label{eq:plus_model}
+$$
+f(x)=\sum^M_{m=1}\beta_mb(x;\gamma_m) \label{eq:plus_model}
 \\ b(x;\gamma_m)是基函数，\gamma_m基函数的参数，\beta_m是基函数的系数。
-\end{equation}
-
+$$
 在给定训练数据以及损失函数$L(y, f(x))$的条件下，学习加法模型$f(x)$就是一个经验风险极小化问题即损失函数极小化问题
-\begin{equation}
-min_{\beta_m, \gamma_m}\sum^N_{i=1}L(y_i, \sum^M_{m=1}\beta_m b(x_i;\gamma_m))
+$$
+min{\beta_m, \gamma_m}\sum^N_{i=1}L(y_i, \sum^M_{m=1}\beta_m b(x_i;\gamma_m))
 \label{eq:loss_func}
-\end{equation}
-
+$$
 直接求解这个的最小值是个很复杂的优化问题，因此我们采用**前向分步算法**来解决这一优化问题。
 
 前向分步算法的思路是：因为学习的是加法模型，若能从前到后，每一步只学习一个基函数及其系数，逐步逼近优化目标函数，那么就可以简化复杂度。每步只需要优化如下损失函数
-$$min_{\beta, \gamma}\sum^N_{i=1}L(y_i, \beta b(x_i;\gamma))$$
-
+$$
+min_{\beta, \gamma}\sum^N_{i=1}L(y_i, \beta b(x_i;\gamma))
+$$
 这样的话，原本需要同时求解从$m=1$到$M$所有参数$\beta_m,\gamma_m$的优化问题就简化为逐次求解$\beta_m, \gamma_m$的优化问题。
 
 前向分步算法的步骤为
@@ -138,26 +142,32 @@ Boosting方法可以以多种模型作为基本模型，其中以分类决策树
 以平方损失函数和回归决策树为例，推导下提升树的算法。
 
 首先，提升树模型其实就是决策树的加法模型，表现为：
-$$f_M(x)=\sum^M_{m=1}T(x;\Theta_m)\\
-T(x;\Theta_m)表示决策树；\Theta_m为决策树参数；M为树的个数
-\\ 注意相比于公式\eqref{eq:plus_model}，此处基模型系数默认为1$$[^3]
+$$
+f_M(x)=\sum^M_{m=1}T(x;\Theta_m) \\ 
+T(x;\Theta_m)表示决策树；\Theta_m为决策树参数；M为树的个数 \\
+注意相比于公式\eqref{eq:plus_model}，此处基模型系数默认为1
+$$
+[^3]
 
 回归问题提升树的前向分步算法如下：
-$$f_0(x)=0 \\
+$$
+f_0(x)=0 \\
 f_m(x) = f_{m-1}(x) +T(x;\Theta_m), m=1,2,\dots,M \\
-f_M(x) = \sum^M_{m=1}T(x;\Theta_m)$$
-
+f_M(x) = \sum^M_{m=1}T(x;\Theta_m)
+$$
 在前向分步算法的第$m$步，给定当前模型$f_{m-1}(x)$，需要求解
-$$\hat{\Theta}_m=argmin_{\Theta_m}\sum^N_{i=1}L(y_i, f_{m-1}(x_i)+T(x_i;\Theta_m))$$
-
+$$
+\hat{\Theta}_m=argmin_{\Theta_m}\sum^N_{i=1}L(y_i, f_{m-1}(x_i)+T(x_i;\Theta_m))
+$$
 从而得到$\hat{\Theta}_m$，即第$m$棵树的参数。
 
 当采用平方误差损失函数$L(y,f(x))=(y-f(x))^2$时，其损失变为
-$$L(y,f_{m-1}(x)+T(x;\Theta_m)) \\
+$$
+L(y,f_{m-1}(x)+T(x;\Theta_m)) \\
 = [y-f_{m-1}(x)-T(x;\Theta_m)]^2 \\
 = [r-T(x;\Theta_m)]^2 \\
-其中，r=y-f_{m-1}(x)，即残差（residual）$$
-
+其中，r=y-f_{m-1}(x)，即残差（residual）
+$$
 所以，对于回归问题的Boosting Tree来说，每一步只需要拟合当前模型的残差即可。
 
 ### 3.3 Gradient Boosting梯度提升
@@ -181,34 +191,35 @@ GBDT，Gradient Boosting Descision Tree，就是前面所提到的Gradient Boost
 ### 4.1 GBDT的目标函数
 
 对于普通的机器学习模型而言，其目标函数可以定义为如下：
-$$Obj = \sum^n_{i=1}l(y_i,\hat{y}_i) + \sum^K_{k=1}\Omega(f_k)$$
-
+$$
+Obj = \sum^n_{i=1}l(y_i,\hat{y}_i) + \sum^K_{k=1}\Omega(f_k)
+$$
 其中，前面的是$loss$函数，后面的$\Omega$是正则化项。
 
 结合前述的前向分步算法的原理，在第$t$步时，目标函数就是
-
-\begin{equation}
+$$
 Obj^{(t)}=\sum^n_{i=1}l(y_i, \hat{y}^t_i) +\sum^t_{i=1}\Omega(f_i) \\
-= \sum^n_{i=1}l(y_i,\hat{y}^{t-1}_i+f_t(x_i))+\Omega(f_t)+constant
+= \sum^n_{i=1}l(y_i,\hat{y}^{t-1}_i+f_t(x_i))+\Omega(f_t)+constant \\
 \label{eq:obj}
-\end{equation}
-
+$$
 此时最优化该目标函数，就求得了$f_t{x_i}$。
 
 #### 4.1.2 负梯度的理论支撑
 
 前面第3.3节提到Gradient Boosting时，提及Gradient Boosting以负梯度代替残差来求解基函数，实际上，负梯度的理论支撑则是**泰勒公式的一阶展开**。即
-$$f(x+\Delta x)\approx f(x)+f'(x)\Delta x$$
-
+$$
+f(x+\Delta x)\approx f(x)+f'(x)\Delta x
+$$
 对$l(y_i,\hat{y}^{t-1}_i+f_t(x_i))$作泰勒一阶展开，得到
-$$l(y_i,\hat{y}^{t-1}_i+f_t(x_i))=l(y_i,\hat{y}^{t-1}_i)+g_if_t(x_i) \\
-g_i是l(y_i,\hat{y}^{t-1}_i)关于\hat{y}^{t-1}的一阶导$$
-
+$$
+l(y_i,\hat{y}^{t-1}_i+f_t(x_i))=l(y_i,\hat{y}^{t-1}_i)+g_if_t(x_i) \\
+g_i是l(y_i,\hat{y}^{t-1}_i)关于\hat{y}^{t-1}的一阶导
+$$
 此时公式\eqref{eq:obj}目标函数（不考虑正则项）则变成
-$$Obj^{(t)} = \sum^n_{i=1}[l(y_i,\hat{y}^{t-1}_i)+g_if_t(x_i)] \\
+$$
+Obj^{(t)} = \sum^n_{i=1}[l(y_i,\hat{y}^{t-1}_i)+g_if_t(x_i)] \\
 Obj^{(t-1)} = \sum^n_{i=1}[l(y_i,\hat{y}^{t-1}_i)]
 $$
-
 我们肯定希望$Obj$函数每步都减小的，即$Obj^{(t)} < Obj^{(t-1)}$，那么关键就在于$g_if_t(x_i)$这一项了。因为我们不知道$g_i$到底是正还是负，那么只需让$f_t(x_i)=-\alpha g_i$（$\alpha$是我们任取的一个正系数）就能让$g_if_t(x_i)$一直恒为负了。
 
 
@@ -218,20 +229,23 @@ $$
 xgboost是GBDT的一个变种，也是最广泛的一种应用。它在对$loss$函数进行泰勒展开时，取的是**二阶展开**而非一阶展开，因此与实际$Obj$函数的值更接近（前提条件要求$loss$函数二阶可导）。
 
 泰勒公式的二阶展开为：
-$$f(x+\Delta x)\approx f(x)+f'(x)\Delta x+\frac{1}{2}f''(x)\Delta x^2$$
+$$
+f(x+\Delta x)\approx f(x)+f'(x)\Delta x+\frac{1}{2}f''(x)\Delta x^2
+$$
+
 
 带入到公式\eqref{eq:obj}中，则
-$$Obj^{(t)} \approx \sum^n_{i=1}[l(y_i,\hat{y}^{t-1}_i)+g_if_t(x_i)+\frac{1}{2}h_if_t^2(x_i)]+\Omega(f_t) \\
+$$
+Obj^{(t)} \approx \sum^n_{i=1}[l(y_i,\hat{y}^{t-1}_i)+g_if_t(x_i)+\frac{1}{2}h_if_t^2(x_i)]+\Omega(f_t) \\
 g_i是l(y_i,\hat{y}^{t-1}_i)关于\hat{y}^{t-1}的一阶导 \\
-h_i是l(y_i,\hat{y}^{t-1}_i)关于\hat{y}^{t-1}的二阶导$$
-
+h_i是l(y_i,\hat{y}^{t-1}_i)关于\hat{y}^{t-1}的二阶导
+$$
 因为在第$t$步时，$\hat{y}^{t-1}_i$是已知值，所以$l(y_i,\hat{y}^{t-1}_i)$是常数，不影响函数优化，可以省去，则
 
-\begin{equation}
+$$
 Obj^{(t)} \approx \sum^n_{i=1}[g_if_t(x_i)+\frac{1}{2}h_if_t^2(x_i)]+\Omega(f_t)
 \label{eq:xgboost_loss}
-\end{equation}
-
+$$
 对这个Obj进行优化得到的就是第$t$步的$f_t(x)$，然后最终将每一步的$f(x)$加在一起就得到了整体模型。
 
 > 后续章节中，我们都使用xgboost的目标函数来进行推导。
@@ -248,29 +262,32 @@ w_q代表该叶子结点的取值$$
 
 因此，假设$
 I_j=\{i|q(x_i)=j\}$为第$j$个叶子结点的样本集合，那么公式\eqref{eq:xgboost_loss}就变为如下形式：
-\begin{equation}
+$$
 Obj^{(t)} \approx \sum^n_{i=1}[g_if_t(x_i)+\frac{1}{2}h_if_t^2(x_i)]+\Omega(f_t)\\
 =\sum^n_{i=1}[g_iw_{q(x_i)}+\frac{1}{2}h_iw^2_{q(x_i)}]+\gamma T+\frac{1}{2}\lambda\sum^T_{j=1}w_j^2 \\
 = \sum^T_{j=1}[(\sum_{i\in I_j}g_i)w_j+\frac{1}{2}(\sum_{i\in I_j}h_i+\lambda)w^2_j]+\gamma T \\
 令G_j=\sum_{i\in I_j}g_i，H_j=\sum_{i\in I_j}h_i \\
 = \sum^T_{j=1}[G_jw_j+\frac{1}{2}(H_j+\lambda)w_j^2]+\gamma T
-\end{equation}
-
+$$
 当位于第$t$步时，在树的结构固定的情况下，我们已经知道每个叶子结点有哪些样本，则$q$和$I_j$是确定的。又因为$g_i$和$h_i$是$t-1$步的导数，所以也是固定的，因此$G_j$和$H_j$都是固定的。
 
 令$Obj$函数关于$w_j$的一阶导为$0$，即可求得最优的$w_j$（$obj$函数对于$w_j$来说，是个凸函数），即
-$$w_j^*=-\frac{G_j}{H_j+\lambda}$$
+$$
+w_j^*=-\frac{G_j}{H_j+\lambda}
+$$
 
 > 注意，二阶泰勒展开的$obj$函数针对于$w_j$是凸函数，因此可以直接求出最优解析解。而一阶展开时的$obj$函数不是可导的，所以只能逐步降低$obj$函数。（估计这也是XGBoost选择二阶泰勒展开的原因之一）
 
 则针对于结构固定的决策树，最优的$obj$函数即为：
-$$Obj=-\frac{1}{2}\sum^T_{j=1}\frac{G_j^2}{H_j+\lambda}+\gamma T$$
+$$
+Obj=-\frac{1}{2}\sum^T_{j=1}\frac{G_j^2}{H_j+\lambda}+\gamma T
+$$
 
 ### 4.3 求解最优结构的决策树
 
 前面提到，对于固定结构的决策树，我们可以得知其最优的$obj$函数的值。那么，该如何求解最优结构的决策树呢？
 
-第$2.1$节提到，决策树通常采用后剪枝的方案，因此其学习分为两个阶段：决策树的生成（特征选择在生成阶段处理）和决策树的剪枝。其中决策树的生成阶段仅考虑如何更好的对训练数据进行拟合，只有到了决策树的剪枝阶段才考虑到了减少模型复杂度的问题。
+第2.1节提到，决策树通常采用后剪枝的方案，因此其学习分为两个阶段：决策树的生成（特征选择在生成阶段处理）和决策树的剪枝。其中决策树的生成阶段仅考虑如何更好的对训练数据进行拟合，只有到了决策树的剪枝阶段才考虑到了减少模型复杂度的问题。
 
 在普通的GBDT采用决策树是CART，因此也是用后剪枝来处理过拟合的问题。
 
@@ -330,14 +347,17 @@ exact greedy algorithm计算量过大，而且当数据量较大没法全填入�
 那么该如何寻找值域分界点$\{s_{k1},s_{k2},\dots,s_{kl}\}$呢？XGBoost中介绍了一种方法，叫**加权分位数略图 Weighted Quantile Sketch**。
 
 为了尽可能的逼近最佳分裂点，我们需要保证采样后的数据分布和原始数据分布尽可能一直。令$D_k=\{(x_{1k},h_1),(x_{2k},h_2),\dots,(x_{nk},h_n)\}$表示每个训练样本的第$k$维特征的值和对应的二阶导数。然后定义排序函数为
-$$r_k(z)=\frac{\sum_{(x,h)\in D_k, x<z}h}{\sum_{(x,h)\in D_k}h} \\ 
-即函数特征值小于z的样本分布占比，二阶导h是权重$$
+$$
+r_k(z)=\frac{\sum_{(x,h)\in D_k, x<z}h}{\sum_{(x,h)\in D_k}h} \\ 
+即函数特征值小于z的样本分布占比，二阶导h是权重
+$$
 
 > 为什么使用二阶导h作为权重，参见Reference 6的附录部分。从公式上来看，当$h$越大时，$s_{k,j}$就越密集。
 
 然后找到一组点$\{s_{k1},s_{k2},\dots,s_{kl}\}$满足：
-$$|r_k(s_{k,j})-r_k(s_{k,j+1})|<\varepsilon $$
-
+$$
+|r_k(s_{k,j})-r_k(s_{k,j+1})|<\varepsilon
+$$
 其中，$s_{k1}=min_i\ x_{ik}, s_{kl}=max_i\ x_{ik}$。$\varepsilon$是采样率，因为$0<r_k(z)<1$，所以我们会得到$1/\varepsilon$个分界点。
 
 ![6](https://raw.githubusercontent.com/Dounm/TheFarmOfDounm/master/resources/images/gdbt/6.png)
@@ -366,18 +386,20 @@ XGBoost存储训练数据的数据结构被称为Block，每个Block内的数据
 - colPtrs[]：colPtrs[0]=0, colPtrs[i]=colPtrs[i-1]+(原始矩阵中第i-1列非0元素的个数)
 
 举例如下：
+$$
 \begin{matrix}
 9&0&1 \\
 0&8&0 \\
 0&6&0
 \end{matrix}
-
+$$
 存储的3个矩阵分别是：
-$$values[]=9,8,6,1\\
-rowIndices[]=0,1,2,0\\
-colPtrs[]=0,1,3,4$$
-
-实际上xgboost存储的时候，每一列都按照该列特征的取值排序好。这样一来的话，在寻找最优分割点，遍历所有特征的取值时，我们只需要遍历$values[]$即可（可以多线程并行加速遍历不同列的特征）。
+$$
+values[]=9,8,6,1 \\
+rowIndices[]=0,1,2,0 \\
+colPtrs[]=0,1,3,4
+$$
+实际上xgboost存储的时候，每一列都按照该列特征的取值排序好。这样一来的话，在寻找最优分割点，遍历所有特征的取值时，我们只需要遍历$values[]​$即可（可以多线程并行加速遍历不同列的特征）。
 
 ### 5.4 分布式实现
 
@@ -393,7 +415,7 @@ colPtrs[]=0,1,3,4$$
 6. Chen, Tianqi, and Carlos Guestrin. "Xgboost: A scalable tree boosting system." Proceedings of the 22nd acm sigkdd international conference on knowledge discovery and data mining. ACM, 2016.
 7. [XGboost: A Scalable Tree Boosting System论文及源码导读](http://mlnote.com/2016/10/05/a-guide-to-xgboost-A-Scalable-Tree-Boosting-System/)
 8. [Why xgboost is so fast？-Yafei Zhang](https://pan.baidu.com/s/1hrVWQrU?errno=0&errmsg=Auth%20Login%20Sucess&&bduss=&ssnerror=0&traceid=)
-  
+
 [^1]: 详细请参照《统计学习方法》第五章
 
 [^2]: 为什么树模型是最好的
@@ -401,10 +423,10 @@ colPtrs[]=0,1,3,4$$
 [^3]: 为什么系数默认为1？
 
 
-  [1]: http://static.zybuluo.com/Dounm/lcv6aatyd64r0jv2dz159qho/image.png
-  [2]: http://static.zybuluo.com/Dounm/a51akve3wae141jczsq26w5g/image.png
-  [3]: http://static.zybuluo.com/Dounm/8wnd4sdygh8uc50pllo5jdfc/image.png
-  [4]: http://static.zybuluo.com/Dounm/rp0kukrsy8luc0rcwxkovkvn/image.png
-  [5]: http://static.zybuluo.com/Dounm/r11bcavw05iufviwqngto7nl/image.png
-  [6]: http://static.zybuluo.com/Dounm/5miya44oagno29ungaxvlqzn/image.png
-  [7]: http://static.zybuluo.com/Dounm/0v52zjv6wvumut3es03drjze/image.png
+[1]: http://static.zybuluo.com/Dounm/lcv6aatyd64r0jv2dz159qho/image.png
+[2]: http://static.zybuluo.com/Dounm/a51akve3wae141jczsq26w5g/image.png
+[3]: http://static.zybuluo.com/Dounm/8wnd4sdygh8uc50pllo5jdfc/image.png
+[4]: http://static.zybuluo.com/Dounm/rp0kukrsy8luc0rcwxkovkvn/image.png
+[5]: http://static.zybuluo.com/Dounm/r11bcavw05iufviwqngto7nl/image.png
+[6]: http://static.zybuluo.com/Dounm/5miya44oagno29ungaxvlqzn/image.png
+[7]: http://static.zybuluo.com/Dounm/0v52zjv6wvumut3es03drjze/image.png
