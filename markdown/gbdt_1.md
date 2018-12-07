@@ -26,7 +26,7 @@ $$
 $$
 Obj^{(t)}=\sum^n_{i=1}l(y_i, \hat{y}^t_i) +\sum^t_{i=1}\Omega(f_i) \\
 = \sum^n_{i=1}l(y_i,\hat{y}^{t-1}_i+f_t(x_i))+\Omega(f_t)+constant \\
-\label{eq:obj}
+\label{obj}
 $$
 此时最优化该目标函数，就求得了$f_t{x_i}$。
 
@@ -41,12 +41,12 @@ $$
 l(y_i,\hat{y}^{t-1}_i+f_t(x_i))=l(y_i,\hat{y}^{t-1}_i)+g_if_t(x_i) \\
 g_i是l(y_i,\hat{y}^{t-1}_i)关于\hat{y}^{t-1}的一阶导
 $$
-此时公式\eqref{eq:obj}目标函数（不考虑正则项）则变成
+此时公式$\ref{obj}$目标函数（不考虑正则项）则变成
 $$
 Obj^{(t)} = \sum^n_{i=1}[l(y_i,\hat{y}^{t-1}_i)+g_if_t(x_i)] \\
 Obj^{(t-1)} = \sum^n_{i=1}[l(y_i,\hat{y}^{t-1}_i)]
 $$
-我们肯定希望$Obj$函数每步都减小的，即$Obj^{(t)} < Obj^{(t-1)}$，那么关键就在于$g_if_t(x_i)$这一项了。因为我们不知道$g_i$到底是正还是负，那么只需让$f_t(x_i)=-\alpha g_i$（$\alpha$是我们任取的一个正系数）就能让$g_if_t(x_i)$一直恒为负了。
+我们肯定希望$Obj​$函数每步都减小的，即$Obj^{(t)} < Obj^{(t-1)}​$，那么关键就在于$g_if_t(x_i)​$这一项了。因为我们不知道$g_i​$到底是正还是负，那么只需让$f_t(x_i)=-\alpha g_i​$（$\alpha​$是我们任取的一个正系数）就能让$g_if_t(x_i)​$一直恒为负了。
 
 
 
@@ -60,7 +60,7 @@ f(x+\Delta x)\approx f(x)+f'(x)\Delta x+\frac{1}{2}f''(x)\Delta x^2
 $$
 
 
-带入到公式\eqref{eq:obj}中，则
+带入到公式$\ref{obj}$中，则
 $$
 Obj^{(t)} \approx \sum^n_{i=1}[l(y_i,\hat{y}^{t-1}_i)+g_if_t(x_i)+\frac{1}{2}h_if_t^2(x_i)]+\Omega(f_t) \\
 g_i是l(y_i,\hat{y}^{t-1}_i)关于\hat{y}^{t-1}的一阶导 \\
@@ -70,7 +70,7 @@ $$
 
 $$
 Obj^{(t)} \approx \sum^n_{i=1}[g_if_t(x_i)+\frac{1}{2}h_if_t^2(x_i)]+\Omega(f_t)
-\label{eq:xgboost_loss}
+\label{xgboost_loss}
 $$
 对这个Obj进行优化得到的就是第$t$步的$f_t(x)$，然后最终将每一步的$f(x)$加在一起就得到了整体模型。
 
@@ -87,7 +87,7 @@ w_q代表该叶子结点的取值$$
 另一方面，决策树的复杂度可以由$\Omega(f_t)=\gamma T+\frac{1}{2}\lambda\sum^T_{j=1}w_j^2$来定义，即决策树叶子结点的数量和叶子结点取值的L2范数。
 
 因此，假设$
-I_j=\{i|q(x_i)=j\}$为第$j$个叶子结点的样本集合，那么公式\eqref{eq:xgboost_loss}就变为如下形式：
+I_j=\{i|q(x_i)=j\}$为第$j$个叶子结点的样本集合，那么公式$\ref{xgboost_loss}$就变为如下形式：
 $$
 Obj^{(t)} \approx \sum^n_{i=1}[g_if_t(x_i)+\frac{1}{2}h_if_t^2(x_i)]+\Omega(f_t)\\
 =\sum^n_{i=1}[g_iw_{q(x_i)}+\frac{1}{2}h_iw^2_{q(x_i)}]+\gamma T+\frac{1}{2}\lambda\sum^T_{j=1}w_j^2 \\

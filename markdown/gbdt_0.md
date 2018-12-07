@@ -115,13 +115,13 @@ $$
 
 考虑加法模型
 $$
-f(x)=\sum^M_{m=1}\beta_mb(x;\gamma_m) \label{eq:plus_model}
+f(x)=\sum^M_{m=1}\beta_mb(x;\gamma_m) \label{plus_model}
 \\ b(x;\gamma_m)是基函数，\gamma_m基函数的参数，\beta_m是基函数的系数。
 $$
 在给定训练数据以及损失函数$L(y, f(x))$的条件下，学习加法模型$f(x)$就是一个经验风险极小化问题即损失函数极小化问题
 $$
 min{\beta_m, \gamma_m}\sum^N_{i=1}L(y_i, \sum^M_{m=1}\beta_m b(x_i;\gamma_m))
-\label{eq:loss_func}
+\label{loss_func}
 $$
 直接求解这个的最小值是个很复杂的优化问题，因此我们采用**前向分步算法**来解决这一优化问题。
 
@@ -152,7 +152,7 @@ $$
 f_M(x)=\sum^M_{m=1}T(x;\Theta_m) \\ 
 T(x;\Theta_m)表示决策树；\Theta_m为决策树参数；M为树的个数 \\
 $$
-注意相比于公式\eqref{eq:plus_model}，此处基模型系数默认为1。 [^3]
+注意相比于公式$\ref{plus_model}​$，此处基模型系数默认为1。 [^3]
 
 回归问题提升树的前向分步算法如下：
 $$
