@@ -1,6 +1,10 @@
-# CUDA程序调优指南（三）：BlockNum和ThreadNumPerBlock
-
-[TOC]
+---
+title: "CUDA程序调优指南（三）：BlockNum和ThreadNumPerBlock"
+date: 2018-12-12T23:48:08+08:00
+tags: [CUDA]
+categories: [CUDA]
+toc: true
+---
 
 **（以下纯属经验而谈，并非一定准确）**
 

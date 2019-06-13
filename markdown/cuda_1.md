@@ -1,6 +1,10 @@
-# CUDA程序调优指南（二）：性能调优
-
-[TOC]
+---
+title: "CUDA程序调优指南（二）：性能调优"
+date: 2018-12-12T23:47:08+08:00
+tags: [CUDA]
+categories: [CUDA]
+toc: true
+---
 
 ## 3. CUDA程序性能调优
 
@@ -25,7 +29,7 @@
 
 对于单独的local var，其会被放在register里面，因此读写极快。
 
-对于数组类型的local var，根据访问pattern的不同，速度也不同（见[per-thread array的访问](onenote:#per-thread%20array的访问&section-id={5C77B0DB-D635-4E98-9899-D7852F21785F}&page-id={A9B21393-322A-4EE6-AEA1-D8096233123D}&end&base-path=https://d.docs.live.net/606463c833bea118/Documents/Distribute%20Computing/GPU.one)）
+对于数组类型的local var，根据访问pattern的不同，速度也不同（见[per-thread array的访问](https://devblogs.nvidia.com/fast-dynamic-indexing-private-arrays-cuda/)）
 
 总结而言是这样的：
 

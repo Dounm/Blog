@@ -1,6 +1,10 @@
-# CUDA程序调优指南（一）：GPU硬件
-
-[TOC]
+---
+title: "CUDA程序调优指南（一）：GPU硬件"
+date: 2018-12-12T23:46:08+08:00
+tags: [CUDA]
+categories: [CUDA]
+toc: true
+---
 
 ## 1. GPU的硬件结构与执行原理
 
